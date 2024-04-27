@@ -79,7 +79,4 @@ let updateCircle = () => {
     circle1.color = "black";
   }
 };
-
-console.log(getDistance(circle1.xpos, circle1.ypos, circle2.xpos, circle2.ypos));
-
 updateCircle();
