@@ -34,22 +34,46 @@ mapImg = createImage("./images/map.png");
 // OBJECTS
 
 const enemies = [];
-for (let i = 1; i < 10; i++) {
-  const xOffset = i * 150;
-  enemies.push(new Enemy({ position: { x: waypoints[0].x - xOffset, y: waypoints[0].y } }));
+function spawnEnemies(spawnCount) {
+  for (let i = 1; i <= spawnCount; i++) {
+    const xOffset = i * 150;
+    enemies.push(new Enemy({ position: { x: waypoints[0].x - xOffset, y: waypoints[0].y } }));
+  }
 }
 
 const buildings = [];
 let activeTile = undefined;
+let enemyWaveCount = 3;
+let hearts = 10;
+
+spawnEnemies(enemyWaveCount);
 
 //  FRAMES
 function animate() {
-  requestAnimationFrame(animate);
+  const animationId = requestAnimationFrame(animate);
   c.drawImage(mapImg, 0, 0);
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
     enemy.update();
+
+    // eliminate enemy when arrived at the end of the map
+    if (enemy.position.x > canvas.width) {
+      hearts -= 1;
+      enemies.splice(i, 1);
+
+      // GAME OVER
+      if (hearts <= 0) {
+        window.cancelAnimationFrame(animationId);
+        document.querySelector(".gameover").style.display = "flex";
+      }
+    }
+  }
+
+  // track total amount of enemies and respawn
+  if (enemies.length === 0) {
+    enemyWaveCount += 2;
+    spawnEnemies(enemyWaveCount);
   }
 
   placementTiles.forEach((tile) => tile.update(mouse));
@@ -75,6 +99,7 @@ function animate() {
       const xDifference = projectile.enemy.center.x - projectile.position.x;
       const yDifference = projectile.enemy.center.y - projectile.position.y;
       const distance = Math.hypot(xDifference, yDifference);
+
       // check if projectile collided with the enemy
       if (distance < projectile.enemy.radius + projectile.radius) {
         // create damage to enemy
@@ -90,6 +115,7 @@ function animate() {
             enemies.splice(enemyIndex, 1);
           }
         }
+
         // delete projectile
         building.projectiles.splice(i, 1);
       }
