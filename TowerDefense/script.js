@@ -47,7 +47,10 @@ function animate() {
   requestAnimationFrame(animate);
   c.drawImage(mapImg, 0, 0);
 
-  enemies.forEach((enemy) => enemy.update());
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const enemy = enemies[i];
+    enemy.update();
+  }
 
   placementTiles.forEach((tile) => tile.update(mouse));
 
@@ -55,15 +58,16 @@ function animate() {
     building.update();
     building.target = null;
 
+    // check if enemy is in tower fire range
     const validEnemies = enemies.filter((enemy) => {
       const xDifference = enemy.center.x - building.center.x;
       const yDifference = enemy.center.y - building.center.y;
       const distance = Math.hypot(xDifference, yDifference);
       return distance < enemy.radius + building.radius;
     });
-
     building.target = validEnemies[0];
 
+    //  projectile logic
     for (let i = building.projectiles.length - 1; i >= 0; i--) {
       const projectile = building.projectiles[i];
       projectile.update();
@@ -71,7 +75,22 @@ function animate() {
       const xDifference = projectile.enemy.center.x - projectile.position.x;
       const yDifference = projectile.enemy.center.y - projectile.position.y;
       const distance = Math.hypot(xDifference, yDifference);
+      // check if projectile collided with the enemy
       if (distance < projectile.enemy.radius + projectile.radius) {
+        // create damage to enemy
+        projectile.enemy.health -= 20;
+
+        //remove enemy
+        if (projectile.enemy.health <= 0) {
+          const enemyIndex = enemies.findIndex((enemy) => {
+            return projectile.enemy === enemy;
+          });
+
+          if (enemyIndex > -1) {
+            enemies.splice(enemyIndex, 1);
+          }
+        }
+        // delete projectile
         building.projectiles.splice(i, 1);
       }
     }
