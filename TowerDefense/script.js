@@ -45,7 +45,7 @@ const buildings = [];
 let activeTile = undefined;
 let enemyWaveCount = 3;
 let hearts = 10;
-
+let coins = 100;
 spawnEnemies(enemyWaveCount);
 
 //  FRAMES
@@ -61,6 +61,7 @@ function animate() {
     if (enemy.position.x > canvas.width) {
       hearts -= 1;
       enemies.splice(i, 1);
+      document.getElementById("hearts").innerHTML = hearts;
 
       // GAME OVER
       if (hearts <= 0) {
@@ -112,6 +113,8 @@ function animate() {
           });
 
           if (enemyIndex > -1) {
+            coins += 25;
+            document.getElementById("coins").innerHTML = coins;
             enemies.splice(enemyIndex, 1);
           }
         }
@@ -127,10 +130,17 @@ function animate() {
 const mouse = { x: undefined, y: undefined };
 
 canvas.addEventListener("click", (event) => {
-  if (activeTile && !activeTile.isOccupied) {
+  if (activeTile && !activeTile.isOccupied && coins - 50 >= 0) {
+    coins -= 50;
+    document.getElementById("coins").innerHTML = coins;
     buildings.push(new Building({ position: { x: activeTile.position.x, y: activeTile.position.y } }));
     // this work because active tile is a reference to placementTiles
     activeTile.isOccupied = true;
+
+    // sort towers so they don't overlap on the map
+    buildings.sort((a, b) => {
+      return a.position.y - b.position.y;
+    });
   }
 });
 
