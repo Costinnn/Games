@@ -46,6 +46,7 @@ let activeTile = undefined;
 let enemyWaveCount = 3;
 let hearts = 10;
 let coins = 100;
+const explosions = [];
 spawnEnemies(enemyWaveCount);
 
 //  FRAMES
@@ -68,6 +69,17 @@ function animate() {
         window.cancelAnimationFrame(animationId);
         document.querySelector(".gameover").style.display = "flex";
       }
+    }
+  }
+
+  //  render explosions
+  for (let i = explosions.length - 1; i >= 0; i--) {
+    const explosion = explosions[i];
+    explosion.draw();
+    explosion.update();
+
+    if (explosion.frames.current >= explosion.frames.max - 1) {
+      explosions.splice(i, 1);
     }
   }
 
@@ -120,6 +132,14 @@ function animate() {
         }
 
         // delete projectile
+        explosions.push(
+          new Sprite({
+            position: { x: projectile.position.x, y: projectile.position.y },
+            imageSrc: "images/explosion.png",
+            frames: { max: 4 },
+            offset: { x: 0, y: 0 },
+          })
+        );
         building.projectiles.splice(i, 1);
       }
     }
